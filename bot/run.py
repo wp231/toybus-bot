@@ -47,6 +47,7 @@ class Bot(commands.Bot):
                     bot_log.error_load_cog(filename[:-3], e)
 
     async def on_ready(self) -> None:
+        await sync_to_server()
         bot_log.info_start()
 
 
