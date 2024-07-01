@@ -1,7 +1,8 @@
 import discord
-from typing import Dict, List
 from discord import app_commands
 from run import Bot, admin_commands
+from utils.log_manager import bot_log
+from typing import Dict, List, Optional
 from dao.bot_setting_dao import bot_setting
 from utils.converters import pascal_to_space
 from core.cog_utils import CogExtension, CommandChecker
@@ -92,15 +93,27 @@ class Base(CogExtension):
     @app_commands.command(name='pong', description='碰!!!')
     async def pong(self, interaction: discord.Interaction):
         delay_time = round(self.bot.latency * 1000)
-        await interaction.response.send_message(f"Pong!!!  {delay_time} ms")
+        await interaction.response.send_message(f"Pong!!!  `{delay_time}` ms")
 
     @check.roleauth
     @app_commands.command(name='say', description='使用機器人說')
-    async def say(self, interaction: discord.Interaction, string: str):
+    async def say(self, interaction: discord.Interaction, string: str, attachments: Optional[discord.Attachment]):
+        user = interaction.user
+        user_id = interaction.user.id
         try:
-            await interaction.channel.send(string)
+            if attachments:
+                file = await attachments.to_file()
+                await interaction.channel.send(content=string, file=file)
+                bot_log.info_cmd_say(user, user_id, string, True)
+            else:
+                await interaction.channel.send(string)
+                bot_log.info_cmd_say(user, user_id, string, False)
             await interaction.response.send_message("發送成功", ephemeral=True)
-        except:
+        except Exception as e:
+            if attachments:
+                bot_log.error_cmd_say(user, user_id, string, True, e)
+            else:
+                bot_log.error_cmd_say(user, user_id, string, False, e)
             await interaction.response.send_message("發送失敗", ephemeral=True)
 
 

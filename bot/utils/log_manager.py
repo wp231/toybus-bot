@@ -35,7 +35,8 @@ class LogManager:
 
         # 創建文件處理器並設置級別和格式化器
         log_file_path = os.path.join(log_path, name)
-        file_handler = logging.FileHandler(f"{log_file_path}.log", mode='a', encoding='utf-8')
+        file_handler = logging.FileHandler(
+            f"{log_file_path}.log", mode='a', encoding='utf-8')
         file_handler.setLevel(level)
         file_handler.setFormatter(self.formatter)
         self.logger.addHandler(file_handler)
@@ -103,15 +104,15 @@ class BotLogManager(LogManager):
     def info_missing_permissions(self, command_name, user, user_id):
         self.logger.info(
             f"User '{user}({user_id})' lacks permissions to use the '{command_name}' command.")
-        
+
     def info_cmd_stop_bot(self, user, user_id):
         self.logger.info(
             f"Command 'close_bot' to close Bot by {user}({user_id})")
-        
+
     def info_cmd_restart_bot(self, user, user_id):
         self.logger.info(
             f"Command 'restart_bot' to restart Bot by {user}({user_id})")
-        
+
     def info_cmd_load_conf(self, user, user_id):
         self.logger.info(
             f"Command 'load_conf' to load bot setting by {user}({user_id})")
@@ -119,6 +120,22 @@ class BotLogManager(LogManager):
     def error_cmd(self, command_name, user, user_id, error):
         self.logger.error(
             f"User '{user}({user_id})' encountered an error using the {command_name}\n{error}")
+
+    def info_cmd_say(self, user, user_id, content, file: bool):
+        if file:
+            self.logger.info(
+                f"Command 'say' to say '{content}' and send file by {user}({user_id})")
+        else:
+            self.logger.info(
+                f"Command 'say' to say '{content}' by {user}({user_id})")
+
+    def error_cmd_say(self, user, user_id, content, file: bool, error):
+        if file:
+            self.logger.info(
+                f"Command 'say' to say '{content}' and send file by {user}({user_id})\n{error}")
+        else:
+            self.logger.info(
+                f"Command 'say' to say '{content}' by {user}({user_id})\n{error}")
 
 
 bot_log = BotLogManager("bot_info")
