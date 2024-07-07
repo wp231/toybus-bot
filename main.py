@@ -1,6 +1,7 @@
 import os
 import sys
 import signal
+import git.cmd
 import argparse
 import subprocess
 from typing import List
@@ -13,6 +14,10 @@ SCRIPTS_PATH = [
     "bot/run.py"
 ]
 
+global pids
+pids: List[int] = []
+
+
 def init_project_dir():
     # 設定工作目錄
     current_file_path = os.path.abspath(__file__)
@@ -21,9 +26,6 @@ def init_project_dir():
 
     os.makedirs(TMP_DIR_PATH, exist_ok=True)
     os.makedirs(DATA_DIR_PATH, exist_ok=True)
-
-global pids
-pids: List[int] = []
 
 
 def save_pids(file_path: str = PIDS_TMP_FILE_PATH):
@@ -46,9 +48,9 @@ def load_pids(file_path: str = PIDS_TMP_FILE_PATH):
             pids = []
             return
 
-    with open(file_path, "r") as f:    
+    with open(file_path, "r") as f:
         pids = [int(line.strip()) for line in f.readlines()]
-        
+
 
 def pid_manager(func):
     def wrapper(*args, **kwargs):
@@ -57,6 +59,7 @@ def pid_manager(func):
         save_pids()
         return result
     return wrapper
+
 
 @pid_manager
 def start_scripts(scripts_path: List[str]):
@@ -70,6 +73,7 @@ def start_scripts(scripts_path: List[str]):
             stderr=sys.stderr
         )
         pids.append(process.pid)
+
 
 @pid_manager
 def stop_scripts() -> List[int]:
@@ -89,20 +93,41 @@ def stop_scripts() -> List[int]:
         except:
             fail_pids.append(pid)
 
-    # 移除停止成功的 PID
-    pids = [each for each in pids if each in fail_pids]
+    pids = []
 
     return fail_pids
+
+
+def update_scripts():
+    '''更新腳本'''
+    stop_scripts()
+
+    g = git.cmd.Git(".")
+
+    branch = g.branch("-r")
+    if "origin/main" in branch:
+        g.pull("origin", "main")
+    elif "origin/master" in branch:
+        g.pull("origin", "master")
+    else:
+        print("No main or master branch found")
+        sys.exit(1)
+
+    start_scripts(SCRIPTS_PATH)
 
 
 if __name__ == "__main__":
     init_project_dir()
     load_pids()
 
-    parser = argparse.ArgumentParser(
-        description="Controls the operation of the bot.")
-    parser.add_argument("command", choices=['start', 'stop', 'restart', 'status'],
-                        help="Specifies the command to manage the bot")
+    parser = argparse.ArgumentParser(description="Bot manager")
+    subparsers = parser.add_subparsers(dest="command")
+
+    subparsers.add_parser("start", help="Start the bot")
+    subparsers.add_parser("stop", help="Stop the bot")
+    subparsers.add_parser("restart", help="Restart the bot")
+    subparsers.add_parser("status", help="Check the bot status")
+    subparsers.add_parser("update", help="Update the bot")
 
     args = parser.parse_args()
 
@@ -120,27 +145,31 @@ if __name__ == "__main__":
             sys.exit(1)
 
         fail_pids = stop_scripts()
-        
+
         if not fail_pids:
             print("Bot has stopped")
         else:
-            print("Failed to stop the bot")
+            print(f"Failed to stop the bot: {fail_pids}")
 
     elif args.command == "restart":
         if not pids:
             print("Bot is not running")
             sys.exit(1)
 
-        fail_pids = stop_scripts()
-
-        if not fail_pids:
-            start_scripts(SCRIPTS_PATH)
-            print("Bot has restarted")
-        else:
-            print("Failed to restart the bot")
+        stop_scripts()
+        start_scripts(SCRIPTS_PATH)
+        print("Bot has restarted")
 
     elif args.command == "status":
         if pids:
             print("Bot is running")
         else:
             print("Bot is not running")
+
+    elif args.command == "update":
+        print("Bot is updating...")
+        update_scripts()
+        print("Bot has updated")
+
+    else:
+        parser.print_help()
