@@ -98,22 +98,29 @@ def stop_scripts() -> List[int]:
     return fail_pids
 
 
+@pid_manager
 def update_scripts():
     '''更新腳本'''
-    stop_scripts()
+    global pids
+    is_running = bool(pids)
+
+    if is_running:
+        stop_scripts()
 
     g = git.cmd.Git(".")
 
     branch = g.branch("-r")
     if "origin/main" in branch:
         g.pull("origin", "main")
+        print("main branch")
     elif "origin/master" in branch:
         g.pull("origin", "master")
     else:
         print("No main or master branch found")
         sys.exit(1)
 
-    start_scripts(SCRIPTS_PATH)
+    if is_running:
+        start_scripts(SCRIPTS_PATH)
 
 
 if __name__ == "__main__":
