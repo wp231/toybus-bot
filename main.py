@@ -108,13 +108,16 @@ def update_scripts():
         stop_scripts()
 
     g = git.cmd.Git(".")
-
     branch = g.branch("-r")
+
     if "origin/main" in branch:
         g.pull("origin", "main")
-        print("main branch")
+        g.reset("--hard", "origin/main")
+
     elif "origin/master" in branch:
         g.pull("origin", "master")
+        g.reset("--hard", "origin/master")
+
     else:
         print("No main or master branch found")
         sys.exit(1)
