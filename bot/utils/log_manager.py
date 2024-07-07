@@ -131,10 +131,10 @@ class BotLogManager(LogManager):
 
     def error_cmd_say(self, user, user_id, content, file: bool, error):
         if file:
-            self.logger.info(
+            self.logger.error(
                 f"Command 'say' to say '{content}' and send file by {user}({user_id})\n{error}")
         else:
-            self.logger.info(
+            self.logger.error(
                 f"Command 'say' to say '{content}' by {user}({user_id})\n{error}")
 
 

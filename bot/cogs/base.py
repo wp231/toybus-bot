@@ -96,25 +96,53 @@ class Base(CogExtension):
         await interaction.response.send_message(f"Pong!!!  `{delay_time}` ms")
 
     @check.roleauth
-    @app_commands.command(name='say', description='使用機器人說')
-    async def say(self, interaction: discord.Interaction, string: str, attachments: Optional[discord.Attachment]):
+    @app_commands.command(name='say', description='匿名發言')
+    async def say(
+            self, interaction: discord.Interaction,
+            text: Optional[str],
+            file1: Optional[discord.Attachment],
+            file2: Optional[discord.Attachment],
+            file3: Optional[discord.Attachment],
+            file4: Optional[discord.Attachment],
+            file5: Optional[discord.Attachment],
+            file6: Optional[discord.Attachment],
+            file7: Optional[discord.Attachment],
+            file8: Optional[discord.Attachment],
+            file9: Optional[discord.Attachment],
+            file10: Optional[discord.Attachment]
+    ):
         user = interaction.user
         user_id = interaction.user.id
+
+        await interaction.response.send_message("正在發送訊息...", ephemeral=True)
+
+        files: List[discord.Attachment] = []
+        for i in range(1, 11):
+            exec(f"if file{i} is not None: files.append(file{i})")
+
         try:
-            if attachments:
-                file = await attachments.to_file()
-                await interaction.channel.send(content=string, file=file)
-                bot_log.info_cmd_say(user, user_id, string, True)
+            if files:
+                to_files: List[discord.File] = [
+                    await file.to_file() for file in files
+                ]
+                await interaction.channel.send(content=text, files=to_files)
+                bot_log.info_cmd_say(user, user_id, text, True)
+
+            elif text:
+                await interaction.channel.send(text)
+                bot_log.info_cmd_say(user, user_id, text, False)
+
             else:
-                await interaction.channel.send(string)
-                bot_log.info_cmd_say(user, user_id, string, False)
-            await interaction.response.send_message("發送成功", ephemeral=True)
+                raise Exception("User did not input any content")
+
+            await interaction.edit_original_response(content="發送成功")
+
         except Exception as e:
-            if attachments:
-                bot_log.error_cmd_say(user, user_id, string, True, e)
+            if files:
+                bot_log.error_cmd_say(user, user_id, text, True, e)
             else:
-                bot_log.error_cmd_say(user, user_id, string, False, e)
-            await interaction.response.send_message("發送失敗", ephemeral=True)
+                bot_log.error_cmd_say(user, user_id, text, False, e)
+            await interaction.edit_original_response(content="發送失敗")
 
 
 async def setup(bot: Bot):
