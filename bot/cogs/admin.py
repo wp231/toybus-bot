@@ -43,6 +43,21 @@ class Admin(CogExtension):
         )
 
     @check.roleauth
+    @app_commands.command(name="update_bot", description="更新機器人")
+    async def update_bot(self, interaction: discord.Interaction):
+        user = interaction.user.name
+        user_id = interaction.user.id
+
+        await interaction.response.send_message("Bot is going to update")
+        bot_log.info_cmd_update_bot(user, user_id)
+
+        subprocess.Popen(
+            [sys.executable, "main.py", "update"],
+            stdout=sys.stdout,
+            stderr=sys.stderr
+        )
+
+    @check.roleauth
     @app_commands.command(name="load_conf", description="載入機器人設定")
     async def load_conf(self, interaction: discord.Interaction):
         user = interaction.user.name

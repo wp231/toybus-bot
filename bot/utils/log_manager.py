@@ -137,6 +137,10 @@ class BotLogManager(LogManager):
             self.logger.error(
                 f"Command 'say' to say '{content}' by {user}({user_id})\n{error}")
 
+    def info_cmd_update_bot(self, user, user_id):
+        self.logger.info(
+            f"Command 'update_bot' to update Bot by {user}({user_id})")
+
 
 bot_log = BotLogManager("bot_info")
 
