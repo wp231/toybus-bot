@@ -33,15 +33,16 @@
 
 ### Cog 規範
 
-- Cog 的`類名`必須與該 Cog 的`檔名`相同
-- 類別必須繼承 `CogExtension` 類別
-- 在 `setup` 函數中，必須加入 `await bot.add_cog(CogName(bot))`，以載入 Cog
-- `CogName` 類別中必須包含 `check = CommandChecker()`
-  - `CommandChecker` 是檢查器，用於檢查指令是否符合條件
-  - 指令函數必須加上 `@check.roleauth` 裝飾器，以檢查是否符合條件
-  - 檢查器會自動生成屬於該 Cog 和 Command 的權限設定位
+1. Cog 的**檔案名稱**需與 Cog 的**類名稱**相同
+2. 類別必須繼承 `CogExtension` 類別
+3. 使用 `__doc__` 屬性來描述 Cog
+4. 使用 `CommandChecker` 來檢查指令是否符合條件
+5. Command 函數的名稱需與 `name=""` 參數相同
+6. 在 `setup` 函數中載入 Cog
 
-以下為 `cog_name.py` 的範例：
+### Cog 範例
+
+`cog_name.py`:
 
 ```python
 import discord
@@ -54,7 +55,9 @@ class CogName(CogExtension):
     __doc__ = "Cog 描述"
     check = CommandChecker()
 
-    @check.roleauth  # check.roleauth 為檢查器，用於檢查指令是否符合條件
+    # check.roleauth 為檢查器，用於檢查指令是否符合條件
+    # 檢查器會自動生成屬於該 Command 的權限設定位
+    @check.roleauth
     @app_commands.command(name="cmd", description="description")
     async def cmd(self, interaction: discord.Interaction):
         pass
