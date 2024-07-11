@@ -86,7 +86,7 @@ def get_cog_doc(cog_name: str) -> str:
     return cog_info.group(1) if cog_info else ""
 
 
-async def unload_cogs_to_options(interaction: discord.Interaction, current: str):
+async def unload_cogs_to_options(interaction: discord.Interaction, current: str = ""):
     '''轉換未載入 cogs 為命令選項'''
     # 不屬於管理身份組，不給予返回
     if ADMIN_ROLES and not (
@@ -98,11 +98,12 @@ async def unload_cogs_to_options(interaction: discord.Interaction, current: str)
     unload_cogs = get_unload_cogs()
     cogs = []
     for cog in unload_cogs:
-        cogs.append(app_commands.Choice(name=cog, value=cog))
+        if current.lower() in cog.lower():
+            cogs.append(app_commands.Choice(name=cog, value=cog))
     return cogs
 
 
-async def load_cogs_to_options(interaction: discord.Interaction, current: str):
+async def load_cogs_to_options(interaction: discord.Interaction, current: str = ""):
     '''轉換載入 cogs 為命令選項'''
     # 不屬於管理身份組，不給予返回
     if ADMIN_ROLES and not (
@@ -114,7 +115,8 @@ async def load_cogs_to_options(interaction: discord.Interaction, current: str):
     load_cogs = get_load_cogs()
     cogs = []
     for cog in load_cogs:
-        cogs.append(app_commands.Choice(name=cog, value=cog))
+        if current.lower() in cog.lower():
+            cogs.append(app_commands.Choice(name=cog, value=cog))
     return cogs
 
 
