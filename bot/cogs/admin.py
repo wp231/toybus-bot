@@ -1,11 +1,29 @@
+import os
 import sys
 import discord
 import subprocess
 from run import Bot
+from typing import List
 from discord import app_commands
 from utils.log_manager import bot_log
+from core.log_viewer import LogPageViewer
 from dao.bot_setting_dao import bot_setting
+from ui.log_viewer_view import LogViewerView
 from core.cog_utils import CogExtension, CommandChecker
+
+
+async def get_log_filenames(
+    interaction: discord.Interaction,
+    current: str
+) -> List[app_commands.Choice]:
+    '''取得日誌檔案名稱列表'''
+    log_dir_path = bot_setting.get_log_dir_path()
+    filenames = os.listdir(log_dir_path)
+    choices = [
+        app_commands.Choice(name=filename, value=filename)
+        for filename in filenames
+    ]
+    return choices
 
 
 class Admin(CogExtension):
@@ -67,6 +85,19 @@ class Admin(CogExtension):
 
         await interaction.response.send_message("載入機器人設定")
         bot_log.info_cmd_load_conf(user, user_id)
+
+    @check.roleauth
+    @app_commands.command(name="log_viewer", description="日誌檢視器")
+    @app_commands.autocomplete(filename=get_log_filenames)
+    async def log_viewer(self, interaction: discord.Interaction, filename: str):
+        log_dir_path = bot_setting.get_log_dir_path()
+        log_file_path = os.path.join(log_dir_path, filename)
+
+        log_page_viewer = LogPageViewer(log_file_path, 1990)
+        view = LogViewerView(log_page_viewer)
+        content = f"```js\n{log_page_viewer.get_page_content()}\n```"
+
+        await interaction.response.send_message(content, view=view)
 
 
 async def setup(bot: Bot):
