@@ -81,10 +81,14 @@ class Admin(CogExtension):
         user = interaction.user.name
         user_id = interaction.user.id
 
-        bot_setting.read()
+        result = bot_setting.read()
 
-        await interaction.response.send_message("載入機器人設定")
-        bot_log.info_cmd_load_conf(user, user_id)
+        if result:
+            await interaction.response.send_message("載入機器人設定")
+            bot_log.info_cmd_load_conf(user, user_id)
+        else:
+            await interaction.response.send_message("載入機器人設定失敗")
+            bot_log.error_cmd_load_conf(user, user_id)
 
     @check.roleauth
     @app_commands.command(name="log_viewer", description="日誌檢視器")

@@ -117,6 +117,10 @@ class BotLogManager(LogManager):
         self.logger.info(
             f"Command 'load_conf' to load bot setting by {user}({user_id})")
 
+    def error_cmd_load_conf(self, user, user_id):
+        self.logger.error(
+            f"Command 'load_conf' to load bot setting by {user}({user_id})")
+
     def error_cmd(self, command_name, user, user_id, error):
         self.logger.error(
             f"User '{user}({user_id})' encountered an error using the {command_name}\n{error}")

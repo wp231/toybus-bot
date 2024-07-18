@@ -1,11 +1,10 @@
 import os
-import json
+from dao.base_dao import BaseDAO
 from typing import List, Dict
 from utils.utils import get_config_file_path
 from utils.converters import pascal_to_snake
 
 BOT_SETTING_FILE_PATH = get_config_file_path("./data/bot_setting.json")
-INDENT = 2
 
 bot_setting_config_format = {
     "log_dir_path": "./log",
@@ -15,44 +14,9 @@ bot_setting_config_format = {
 }
 
 
-class BotSettingDAO:
+class BotSettingDAO(BaseDAO):
     def __init__(self, file_path: str) -> None:
-        self.file_path = file_path
-
-        # 檢查文件存在
-        if not os.path.exists(self.file_path):
-            with open(self.file_path, 'w', encoding='utf8') as f:
-                pass
-
-        # 初始化空，避免讀取錯誤
-        with open(self.file_path, 'r', encoding='utf8') as f:
-            if not f.read():
-                self.jdata = {}
-                self.__write()
-
-        self.read()
-
-        # 全空字典初始化
-        if not self.jdata:
-            self.jdata = bot_setting_config_format
-            self.__write()
-            return
-
-        # 補全字典缺失 key
-        for key in bot_setting_config_format:
-            if self.jdata.get(key) is None:
-                self.jdata[key] = bot_setting_config_format[key]
-        self.__write()
-
-    def read(self):
-        '''讀取檔案'''
-        with open(self.file_path, 'r', encoding='utf8') as jfile:
-            self.jdata = json.load(jfile)
-
-    def __write(self):
-        '''寫入檔案'''
-        with open(self.file_path, 'w', encoding='utf8') as jfile:
-            json.dump(self.jdata, jfile, indent=INDENT)
+        super().__init__(file_path, bot_setting_config_format)
 
     def get_log_dir_path(self) -> str:
         '''獲取日誌文件的目錄'''
@@ -68,7 +32,7 @@ class BotSettingDAO:
         return self.jdata["admin_role_ids"]
 
     @staticmethod
-    def normalize_cog_name(func):
+    def __normalize_cog_name(func):
         '''規範 cog 的名稱'''
 
         def wrapper(self, cog_name: str, *args, **kwargs):
@@ -77,7 +41,7 @@ class BotSettingDAO:
             return func(self, cog_name, *args, **kwargs)
         return wrapper
 
-    @normalize_cog_name
+    @__normalize_cog_name
     def create_cog(self, cog_name: str) -> None:
         '''創建 cog 權限位'''
         if cog_name not in self.jdata["cog_auth"]:
@@ -86,9 +50,9 @@ class BotSettingDAO:
             self.jdata["cog_auth"][cog_name]["roles"] = []
             self.jdata["cog_auth"][cog_name]["permissions"] = {}
             self.jdata["cog_auth"][cog_name]["commands"] = {}
-            self.__write()
+            self.write()
 
-    @normalize_cog_name
+    @__normalize_cog_name
     def get_cog_guilds(self, cog_name: str) -> List[int]:
         '''獲取可使用該 cog 的伺服器'''
         try:
@@ -96,7 +60,7 @@ class BotSettingDAO:
         except:
             return []
 
-    @normalize_cog_name
+    @__normalize_cog_name
     def get_cog_roles(self, cog_name: str) -> List[int]:
         '''獲取可使用該 cog 的身份組'''
         try:
@@ -104,7 +68,7 @@ class BotSettingDAO:
         except:
             return []
 
-    @normalize_cog_name
+    @__normalize_cog_name
     def get_cog_permissions(self, cog_name: str) -> Dict:
         '''獲取可使用該 cog 的權限'''
         try:
@@ -112,40 +76,40 @@ class BotSettingDAO:
         except:
             return {}
 
-    @normalize_cog_name
-    def create_cog_command_roles(self, cog_name: str, command: str):
+    @__normalize_cog_name
+    def __create_cog_command_roles(self, cog_name: str, command: str):
         '''創建 cog 中 command 身份組位'''
         if command not in self.jdata["cog_auth"][cog_name]["commands"]:
             self.jdata["cog_auth"][cog_name]["commands"][command] = {}
 
         self.jdata["cog_auth"][cog_name]["commands"][command]["roles"] = []
-        self.__write()
+        self.write()
 
-    @normalize_cog_name
+    @__normalize_cog_name
     def get_cog_command_roles(self, cog_name: str, command: str) -> List[int]:
         '''獲取可使用該 cog 中 command 的身份組'''
         try:
             return self.jdata["cog_auth"][cog_name]["commands"][command]["roles"]
         except:
-            self.create_cog_command_roles(cog_name, command)
+            self.__create_cog_command_roles(cog_name, command)
             return []
 
-    @normalize_cog_name
-    def create_cog_command_permissions(self, cog_name: str, command: str):
+    @__normalize_cog_name
+    def __create_cog_command_permissions(self, cog_name: str, command: str):
         '''創建 cog 中 command 權限位'''
         if command not in self.jdata["cog_auth"][cog_name]["commands"]:
             self.jdata["cog_auth"][cog_name]["commands"][command] = {}
 
         self.jdata["cog_auth"][cog_name]["commands"][command]["permissions"] = {}
-        self.__write()
+        self.write()
 
-    @normalize_cog_name
+    @__normalize_cog_name
     def get_cog_command_permissions(self, cog_name: str, command: str) -> Dict:
         '''獲取可使用該 cog 中 command 的權限'''
         try:
             return self.jdata["cog_auth"][cog_name]["commands"][command]["permissions"]
         except:
-            self.create_cog_command_permissions(cog_name, command)
+            self.__create_cog_command_permissions(cog_name, command)
             return {}
 
 
