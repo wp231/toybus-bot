@@ -8,5 +8,5 @@ log/
 *_production.json
 *_prod.json
 tmp/
-data/bot_setting*.json
+data/*.json
 *_test.py

@@ -8,6 +8,7 @@ BOT_SETTING_FILE_PATH = get_config_file_path("./data/bot_setting.json")
 
 bot_setting_config_format = {
     "log_dir_path": "./log",
+    "cog_dir_path": "./bot/cogs",
     "admin_guild_ids": [],
     "admin_role_ids": [],
     "cog_auth": {}
@@ -21,6 +22,11 @@ class BotSettingDAO(BaseDAO):
     def get_log_dir_path(self) -> str:
         '''獲取日誌文件的目錄'''
         path = os.path.normpath(self.jdata["log_dir_path"])
+        return path
+
+    def get_cog_dir_path(self) -> str:
+        '''獲取 cog 文件的目錄'''
+        path = os.path.normpath(self.jdata["cog_dir_path"])
         return path
 
     def get_admin_guilds(self) -> List[int]:

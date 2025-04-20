@@ -1,15 +1,7 @@
 import os
 import inspect
-from run import Bot
 from discord import app_commands
-from discord.ext import commands
 from dao.bot_setting_dao import bot_setting
-
-
-class CogExtension(commands.Cog):
-    def __init__(self, bot: Bot):
-        self.bot = bot
-
 
 class CommandChecker:
     def __init__(self) -> None:

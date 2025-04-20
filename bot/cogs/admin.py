@@ -2,15 +2,17 @@ import os
 import sys
 import discord
 import subprocess
-from run import Bot
-from typing import List
 from discord import app_commands
 from utils.log_manager import bot_log
+from typing import List, TYPE_CHECKING
 from core.log_viewer import LogPageViewer
 from dao.bot_setting_dao import bot_setting
 from ui.log_viewer_view import LogViewerView
-from core.cog_utils import CogExtension, CommandChecker
+from core.cog_helpers.cog_extension import CogExtension
+from core.cog_helpers.command_checker import CommandChecker
 
+if TYPE_CHECKING:
+    from core.bot import Bot
 
 async def get_log_filenames(
     interaction: discord.Interaction,
@@ -104,5 +106,5 @@ class Admin(CogExtension):
         await interaction.response.send_message(content, view=view)
 
 
-async def setup(bot: Bot):
+async def setup(bot: 'Bot'):
     await bot.add_cog(Admin(bot))

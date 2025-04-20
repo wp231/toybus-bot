@@ -1,17 +1,19 @@
 import discord
 from discord import app_commands
-from run import Bot, admin_commands
 from utils.log_manager import bot_log
-from typing import Dict, List, Optional
 from dao.bot_setting_dao import bot_setting
 from utils.converters import pascal_to_space
-from core.cog_utils import CogExtension, CommandChecker
+from typing import Dict, List, Optional, TYPE_CHECKING
+from core.cog_helpers.cog_extension import CogExtension
+from core.cog_helpers.command_checker import CommandChecker
 
-check = CommandChecker()
+if TYPE_CHECKING:
+    from core.bot import Bot
 
 
 class Base(CogExtension):
     __doc__ = "基本指令"
+    check = CommandChecker()
 
     def check_roles(self, interaction: discord.Interaction, roles: List[int]) -> bool:
         '''檢查使用者是否屬於指定身份組'''
@@ -49,8 +51,10 @@ class Base(CogExtension):
     async def help(self, interaction: discord.Interaction):
         msg = ""
 
+        cog_contral_commands = self.bot.cog_contral_commands
+
         # 獲取管理指令
-        for command in admin_commands:
+        for command in cog_contral_commands:
             if isinstance(command, app_commands.Command) and \
                     self.check_command_roleauth(interaction, command):
                 msg = msg + "\t" + command.name + ': ' + command.description + '\n'
@@ -145,5 +149,5 @@ class Base(CogExtension):
             await interaction.edit_original_response(content="發送失敗")
 
 
-async def setup(bot: Bot):
+async def setup(bot: 'Bot'):
     await bot.add_cog(Base(bot))

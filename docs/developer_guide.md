@@ -46,9 +46,12 @@
 
 ```python
 import discord
-from run import Bot
 from discord import app_commands
-from core.cog_utils import CogExtension, CommandChecker
+from core.cog_helpers.cog_extension import CogExtension
+from core.cog_helpers.command_checker import CommandChecker
+
+if TYPE_CHECKING:
+    from core.bot import Bot
 
 # Cog 名稱需和檔案名稱相同，採用駝峰式命名
 class CogName(CogExtension):
