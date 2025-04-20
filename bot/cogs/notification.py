@@ -29,7 +29,7 @@ class Notification(CogExtension):
     check = CommandChecker()
 
     @check.roleauth
-    @app_commands.command(name="add_notification", description="description")
+    @app_commands.command(name="add_notification", description="添加新的通知訊息")
     @app_commands.describe(message="需要通知的訊息")
     async def add_notification(self, interaction: discord.Interaction, message: str):
         user_id = interaction.user.id
@@ -42,7 +42,7 @@ class Notification(CogExtension):
         await interaction.response.send_message("# 新增通知", view=NotificationView(message, user_id), ephemeral=True)
 
     @check.roleauth
-    @app_commands.command(name="edit_notification", description="description")
+    @app_commands.command(name="edit_notification", description="編輯通知訊息")
     @app_commands.autocomplete(message=get_user_notifications)
     async def edit_notification(self, interaction: discord.Interaction, message: str):
         user_id = interaction.user.id
@@ -55,7 +55,7 @@ class Notification(CogExtension):
         await interaction.response.send_message("# 編輯通知", view=NotificationView(message, user_id), ephemeral=True)
 
     @check.roleauth
-    @app_commands.command(name="del_notification", description="description")
+    @app_commands.command(name="del_notification", description="刪除通知訊息")
     @app_commands.autocomplete(message=get_user_notifications)
     async def del_notification(self, interaction: discord.Interaction, message: str):
         user_id = interaction.user.id
