@@ -72,7 +72,7 @@ class NotificationManager:
 
         async def send_message():
             channel = await self.bot.fetch_channel(channel_id)
-            if isinstance(channel, discord.TextChannel):
+            if isinstance(channel, (discord.TextChannel, discord.DMChannel)):
                 await channel.send(message)
 
         return send_message

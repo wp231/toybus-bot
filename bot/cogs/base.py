@@ -125,6 +125,10 @@ class Base(CogExtension):
             exec(f"if file{i} is not None: files.append(file{i})")
 
         try:
+            if not isinstance(interaction.channel, (discord.TextChannel, discord.DMChannel)):
+                await interaction.edit_original_response(content="無法在此頻道發送訊息")
+                return
+
             if files:
                 to_files: List[discord.File] = [
                     await file.to_file() for file in files

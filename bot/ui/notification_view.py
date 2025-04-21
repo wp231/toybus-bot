@@ -214,9 +214,6 @@ class NotificationView(discord.ui.View):
 
 
         # ========== 判定編輯或新增通知 ==========
-        hours_select = None
-        minutes_select = None
-        days_select = None
         self.need_edit: bool = False
         
         notifications = notification_dao.get_user_notifications(user_id)
@@ -225,16 +222,16 @@ class NotificationView(discord.ui.View):
             notification = notification_dao.get_weekly_notification(user_id, message)
             if notification is not None:
 
-                hours_select = str(notification.hour)
-                minutes_select = str(notification.minute)
-                days_select = [str(day) for day in notification.weekdays]
+                self.hours_select = str(notification.hour)
+                self.minutes_select = str(notification.minute)
+                self.days_select = [str(day) for day in notification.weekdays]
 
                 self.need_edit = True
         # =======================================
 
-        self.add_item(HoursSelect(hours_select))
-        self.add_item(MinutesSelect(minutes_select))
-        self.add_item(DaysSelect(days_select))
+        self.add_item(HoursSelect(self.hours_select))
+        self.add_item(MinutesSelect(self.minutes_select))
+        self.add_item(DaysSelect(self.days_select))
         self.add_item(SaveButton())
         self.add_item(CancelButton())
 
