@@ -37,11 +37,12 @@ class Notification(CogExtension):
         user_id = interaction.user.id
         notifications = notification_dao.get_user_notifications(user_id)
 
-        if len(notifications) == 0:
-            await interaction.response.send_message("沒有通知訊息", ephemeral=True)
-            return
-
         embed = discord.Embed(title="📬 通知訊息", color=0x00ff00)
+
+        if not notifications:
+            embed.description = "(=^-ω-^=) 啊喔～你現在還沒有任何通知喔！\n\n快去新增一些通知吧，這樣有事情我才可以提醒你 ✨"
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
 
         for notification in sorted(notifications):
 
